@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %} <title>Signup</title> {% endblock %}
+{% block content %}
+    <h2>Sign up</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <p>
+                {{ field.label_tag }}<br>
+                {{ field }}
+                {% for error in field.errors %}
+                    <p style="color: red">{{ error }}</p>
+                {% endfor %}
+            </p>
+        {% endfor %}
+        <button id="signupButton" type="submit">Sign up</button>
+    </form>
+{% endblock %}
