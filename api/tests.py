@@ -1,4 +1,5 @@
 import json
+
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 
@@ -12,10 +13,11 @@ class ListAPITest(APITestCase):
     def setUp(self):
         user = get_user_model().objects.create_user('test', 'test@email.com', 'test')
 
-        category1 = Category.objects.create(name="Test Category 1")
+        self.category1 = Category.objects.create(name="Test Category 1")
 
-        Post.objects.create(user=user, title="Test Title 1", content="Test Content", category=category1,
-                            tags=['tag1', 'tag2'], )
+        self.post = Post.objects.create(user=user, title="Test Title 1", content="Test Content",
+                                        category=self.category1,
+                                        tags=['tag1', 'tag2'], )
 
     def test_get_categories(self):
         response = self.client.get(self.category_url)
@@ -23,7 +25,7 @@ class ListAPITest(APITestCase):
         self.assertEqual(
             json.loads(response.content.decode('utf8')),
             [
-                {'id': 2, 'name': 'Test Category 1'},
+                {'id': self.category1.id, 'name': self.category1.name},
             ]
         )
 

@@ -13,8 +13,9 @@ def index(request):
     posts = Post.objects.filter(is_published=True)
 
     drafts = None
-    if request.user.is_authenticated:
-        drafts = Post.objects.filter(user=request.user).filter(is_published=False)
+    if request.user is not None:
+        if request.user.is_authenticated:
+            drafts = Post.objects.filter(user=request.user).filter(is_published=False)
 
     if form.is_valid():
         category = int(form.cleaned_data.get('category'))
