@@ -9,7 +9,7 @@ from .forms import SignUpForm, NewPostForm, SearchForm
 
 def index(request):
     form = SearchForm(request.GET)
-    posts = Post.objects
+    posts = Post.objects.filter(is_published=True)
 
     if form.is_valid():
         category = int(form.cleaned_data.get('category'))
