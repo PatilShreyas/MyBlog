@@ -4,10 +4,12 @@ from api.serializers import PostSerializer, CategorySerializer
 
 
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
+    queryset = Post.objects.all().filter(is_published=True)
     serializer_class = PostSerializer
+    http_method_names = ['get']
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    http_method_names = ['get']
