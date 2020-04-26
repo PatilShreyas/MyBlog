@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 
 # Create your views here.
@@ -85,3 +86,12 @@ def addpost_view(request):
         form = NewPostForm()
 
     return render(request, 'add_post.html', {'form': form})
+
+
+def postview_view(request, post_id):
+    try:
+        post = Post.objects.get(id=post_id)
+    except ObjectDoesNotExist:
+        post = None
+
+    return render(request, 'postview.html', {'post': post})

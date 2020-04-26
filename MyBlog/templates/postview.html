@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if post is None %}
+        <div class="alert alert-primary" style="margin: 16px">No post!</div>
+
+    {% else %}
+        {% block title %} <title>{{ post.title }}</title> {% endblock %}
+        {% if post.user == user %}
+            <a href="edit/" class="btn btn-secondary btn-lg active" style="margin: 16px" role="button" aria-pressed="true">
+                <i class="fas fa-edit"></i>Edit</a>
+        {% endif %}
+
+        {% if post.is_published == True or post.user == user %}
+
+            <div class="card d-block mx-auto shadow-sm" style="margin: 16px;">
+                <div class="card-header">
+                    <b>{{ post.user.username }}</b> posted on <i>{{ post.created_on }}</i> <br><br>
+                    <i class="fas fa-th-list"></i> {{ post.category.name }} <br>
+                    <i class="fas fa-tags"></i>
+                    {% for tag in post.tags %}
+                        <span class="badge badge-dark">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                <div class="card-body">
+                    <div class="h2">{{ post.title }}</div>
+                    <p class="card-text">{{ post.content }}</p>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-primary" style="margin: 16px">Not published yet!</div>
+        {% endif %}
+    {% endif %}
+
+
+{% endblock %}
+
