@@ -9,6 +9,8 @@
         {% if post.user == user %}
             <a href="edit/" class="btn btn-secondary btn-lg active" style="margin: 16px" role="button" aria-pressed="true">
                 <i class="fas fa-edit"></i>Edit</a>
+             <a href="delete/" class="btn btn-secondary btn-lg active" style="margin: 16px" role="button" aria-pressed="true">
+                <i class="fas fa-trash"></i>Delete</a>
         {% endif %}
 
         {% if post.is_published == True or post.user == user %}

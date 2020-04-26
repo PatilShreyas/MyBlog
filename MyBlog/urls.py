@@ -10,5 +10,6 @@ urlpatterns = [
     path('signout/', auth_views.LogoutView.as_view(), name='signout'),
     path('new/', views.addpost_view, name='new_post'),
     path('post/<int:post_id>/', views.postview_view, name='post'),
-    path('post/<int:post_id>/edit', views.postedit_view, name='editpost'),
+    path('post/<int:post_id>/edit/', views.postedit_view, name='editpost'),
+    path('post/<int:post_id>/delete/', views.postdelete_view, name='deletepost'),
 ]

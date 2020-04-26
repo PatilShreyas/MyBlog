@@ -40,11 +40,10 @@ class SignInForm(AuthenticationForm):
         fields = ('username', 'password',)
 
 
-class NewPostForm(forms.Form):
+class PostForm(forms.Form):
     title = forms.CharField(max_length=50, required=True)
     content = forms.CharField(widget=forms.Textarea, required=True)
     tags = forms.CharField(max_length=30, required=True)
-
     categories = Category.objects.all()
     category = forms.ChoiceField(choices=[(category.id, str(category.name)) for category in categories])
 

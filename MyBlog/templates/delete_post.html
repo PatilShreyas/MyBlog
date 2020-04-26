@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %} <title>Delete Post</title> {% endblock %}
+{% block content %}
+    {% if post.user != user %}
+        <div class="alert alert-warning" style="margin: 16px">ACCESS DENIED!</div>
+    {% else %}
+        <div class="alert alert-danger" style="margin: 16px">Post has been deleted!</div>
+    {% endif %}
+
+    <a href="/blog" class="btn btn-info btn-lg" style="margin: 16px" role="button" aria-pressed="true">
+        Return Home</a>
+
+{% endblock %}
+

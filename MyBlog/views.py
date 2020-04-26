@@ -5,12 +5,16 @@ from django.shortcuts import render, redirect
 # Create your views here.
 
 from .models import Post
-from .forms import SignUpForm, NewPostForm, SearchForm
+from .forms import SignUpForm, PostForm, SearchForm
 
 
 def index(request):
     form = SearchForm(request.GET)
     posts = Post.objects.filter(is_published=True)
+
+    drafts = None
+    if request.user.is_authenticated:
+        drafts = Post.objects.filter(user=request.user).filter(is_published=False)
 
     if form.is_valid():
         category = int(form.cleaned_data.get('category'))
@@ -30,6 +34,7 @@ def index(request):
 
     return render(request, 'home.html', {
         'posts': posts,
+        'drafts': drafts,
         'form': form
     })
 
@@ -54,7 +59,7 @@ def signup_view(request):
 
 
 def addpost_view(request):
-    form = NewPostForm(request.POST)
+    form = PostForm(request.POST)
 
     if form.is_valid():
         title = form.cleaned_data.get('title')
@@ -83,7 +88,7 @@ def addpost_view(request):
         post.save()
         return redirect('index')
     else:
-        form = NewPostForm()
+        form = PostForm()
 
     return render(request, 'add_post.html', {'form': form})
 
@@ -94,4 +99,66 @@ def postview_view(request, post_id):
     except ObjectDoesNotExist:
         post = None
 
-    return render(request, 'postview.html', {'post': post})
+    return render(request, 'view_post.html', {'post': post})
+
+
+def postedit_view(request, post_id):
+    try:
+        post = Post.objects.get(id=post_id)
+        form = PostForm(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data.get('title')
+            content = form.cleaned_data.get('content')
+            category = form.cleaned_data.get('category')
+            tags_data = str(form.cleaned_data.get('tags')).split(",")
+            tags = []
+
+            for tag in tags_data:
+                tag_string = tag.strip().lower()
+
+                if len(tag_string) != 0:
+                    tags.append(tag_string)
+
+            post.title = title
+            post.content = content
+            post.tags = tags
+            post.category_id = category
+
+            if request.POST.get('action', '') == 'save_post':
+                post.is_published = True
+
+            post.save()
+
+            return redirect('index')
+        else:
+            tags = ""
+            for tag in post.tags:
+                tag_string = tag.strip().lower()
+
+                if len(tag_string) != 0:
+                    tags = tags + tag_string + ","
+            form = PostForm(initial={
+                'title': post.title,
+                'content': post.content,
+                'tags': tags,
+                'category': post.category
+            })
+
+    except ObjectDoesNotExist:
+        form = None
+        post = None
+
+    return render(request, 'edit_post.html', {'form': form, 'post': post})
+
+
+def postdelete_view(request, post_id):
+    try:
+        post = Post.objects.get(id=post_id)
+
+        if request.user == post.user:
+            post.delete()
+
+    except ObjectDoesNotExist:
+        post = None
+
+    return render(request, 'delete_post.html', {'post': post})

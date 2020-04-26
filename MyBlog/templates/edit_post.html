@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %} <title>Edit Post</title> {% endblock %}
+{% block content %}
+    {% if post.user != user %}
+        <div class="alert alert-warning" style="margin: 16px">ACCESS DENIED!</div>
+    {% else %}
+        <h2>Edit Post</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <p>
+                    {{ field.label_tag }}<br>
+                    {{ field }}
+                    {% for error in field.errors %}
+                        <p style="color: red">{{ error }}</p>
+                    {% endfor %}
+                </p>
+            {% endfor %}
+            <button class="btn btn-dark" type="submit" name="action" value="save_post">Publish</button>
+
+            {% if not post.is_published %}
+                <button class="btn btn-outline-dark" type="submit" name="action" value="save_draft">Save draft</button>
+            {% endif %}
+        </form>
+    {% endif %}
+
+{% endblock %}
+
