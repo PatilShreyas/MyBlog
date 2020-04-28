@@ -1,6 +1,8 @@
 from django import forms
-from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.models import User
+from django.contrib.postgres.forms import SimpleArrayField
+from django.forms import ModelForm, ModelChoiceField, CharField
 
 from .models import Category, Post
 
@@ -40,13 +42,16 @@ class SignInForm(AuthenticationForm):
         fields = ('username', 'password',)
 
 
-class PostForm(forms.Form):
-    title = forms.CharField(max_length=50, required=True)
-    content = forms.CharField(widget=forms.Textarea, required=True)
-    tags = forms.CharField(max_length=30, required=True)
-    categories = Category.objects.all()
-    category = forms.ChoiceField(choices=[(category.id, str(category.name)) for category in categories])
+class CategoryModelChoiceField(ModelChoiceField):
+    def label_from_instance(self, obj):
+        return "%s" % obj.name
+
+
+class PostForm(ModelForm):
+    title = forms.CharField(max_length=50)
+    category = CategoryModelChoiceField(queryset=Category.objects.all(), required=True)
+    tags = SimpleArrayField((CharField(max_length=30)), delimiter=" ")
 
     class Meta:
         model = Post
-        fields = ('title', 'content', 'tags', 'category',)
+        fields = ('title', 'content', 'tags', 'category')

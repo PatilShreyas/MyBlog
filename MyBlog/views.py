@@ -10,7 +10,7 @@ from .models import Post
 class IndexView(View):
     form_class = SearchForm
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         form = self.form_class(request.GET)
         posts = Post.objects.filter(is_published=True)
 
@@ -80,26 +80,8 @@ class AddPostView(View):
         form = self.form_class(request.POST)
 
         if form.is_valid():
-            title = form.cleaned_data.get('title')
-            content = form.cleaned_data.get('content')
-            category = form.cleaned_data.get('category')
-            tags_data = str(form.cleaned_data.get('tags')).split(" ")
-            tags = []
-
-            for tag in tags_data:
-                tag_string = tag.strip().lower()
-
-                if len(tag_string) != 0:
-                    tags.append(tag_string)
-
-            post = Post(
-                user=request.user,
-                title=title,
-                content=content,
-                tags=tags,
-                category_id=category
-            )
-
+            post = form.save(commit=False)
+            post.user = request.user
             if request.POST.get('action', '') == 'save_draft':
                 post.is_published = False
 
@@ -123,19 +105,8 @@ class PostEditView(View):
     def get(self, request, post_id):
         try:
             post = Post.objects.get(id=post_id)
-            tags = ""
-            for tag in post.tags:
-                tag_string = tag.strip().lower()
 
-                if len(tag_string) != 0:
-                    tags = tags + tag_string + " "
-
-            form = PostForm(initial={
-                'title': post.title,
-                'content': post.content,
-                'tags': tags,
-                'category': post.category
-            })
+            form = PostForm(instance=post)
 
         except ObjectDoesNotExist:
             post = None
@@ -145,33 +116,17 @@ class PostEditView(View):
 
     def post(self, request, post_id):
         post = Post.objects.get(id=post_id)
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, instance=post)
         if form.is_valid():
-            title = form.cleaned_data.get('title')
-            content = form.cleaned_data.get('content')
-            category = form.cleaned_data.get('category')
-            tags_data = str(form.cleaned_data.get('tags')).split(" ")
-            tags = []
-
-            for tag in tags_data:
-                tag_string = tag.strip().lower()
-
-                if len(tag_string) != 0:
-                    tags.append(tag_string)
-
-            post.title = title
-            post.content = content
-            post.tags = tags
-            post.category_id = category
-
+            new_post = form.save(commit=False)
             if request.POST.get('action', '') == 'save_post':
-                post.is_published = True
+                new_post.is_published = True
 
-            post.save()
+            new_post.save()
 
             return redirect('index')
         else:
-            return render(request, 'edit_post.html', {'form': form, 'post': post})
+            return render(request, 'edit_post.html', {'form': form, 'post': self.post})
 
 
 class PostDeleteView(View):
