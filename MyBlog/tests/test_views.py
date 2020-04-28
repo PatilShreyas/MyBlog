@@ -1,20 +1,21 @@
 from django.contrib.auth import get_user_model
-from django.http import HttpRequest
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 
 from MyBlog.models import Category, Post
-from MyBlog.views import index, postdelete_view, postedit_view, postview_view
+from MyBlog.views import IndexView, PostDeleteView, PostEditView, PostView
 
 
 class IndexPageTest(TestCase):
+    index_path = "/"
 
     def setUp(self):
+        self.factory = RequestFactory()
         self.user = get_user_model().objects.create_user('test', 'test@email.com', 'test')
 
     def test_blog_home_page(self):
-        request = HttpRequest()
+        request = self.factory.get(self.index_path)
         request.user = self.user
-        response = index(request)
+        response = IndexView.as_view()(request)
 
         html = response.content.decode('utf8')
 
@@ -28,10 +29,10 @@ class IndexPageTest(TestCase):
         Post.objects.create(user=self.user, title="Test Title 1", content="Test Content", category=category1,
                             tags=['tag1', 'tag2'], )
 
-        request = HttpRequest()
+        request = self.factory.get(self.index_path)
         request.user = self.user
 
-        response = index(request)
+        response = IndexView.as_view()(request)
 
         html = response.content.decode('utf8')
 
@@ -45,10 +46,10 @@ class IndexPageTest(TestCase):
         user = get_user_model().objects.create_user('testauth', 'testauth@email.com', 'testauth')
         user.first_name = "MyTestFirstName"
 
-        request = HttpRequest()
+        request = request = self.factory.get(self.index_path)
         request.user = user
 
-        response = index(request)
+        response = IndexView.as_view()(request)
 
         html = response.content.decode('utf8')
 
@@ -60,8 +61,11 @@ class IndexPageTest(TestCase):
 
 
 class PostDeleteViewTest(TestCase):
+    delete_path = "/blog/post/%s/delete"
 
     def setUp(self):
+        self.factory = RequestFactory()
+
         self.user1 = get_user_model().objects.create_user('test1', 'test1@email.com', 'test1')
         self.user2 = get_user_model().objects.create_user('test2', 'test2@email.com', 'test2')
 
@@ -72,9 +76,9 @@ class PostDeleteViewTest(TestCase):
                                         tags=['tag1', 'tag2'], )
 
     def test_post_deleted_in_post_delete_page(self):
-        request = HttpRequest()
+        request = self.factory.get(self.delete_path % self.post.id)
         request.user = self.user1
-        response = postdelete_view(request, self.post.id)
+        response = PostDeleteView.as_view()(request, self.post.id)
 
         html = response.content.decode('utf8')
 
@@ -82,9 +86,9 @@ class PostDeleteViewTest(TestCase):
         self.assertIn('Post has been deleted!', html)
 
     def test_unauth_in_post_view_page(self):
-        request = HttpRequest()
+        request = self.factory.get(self.delete_path % self.post.id)
         request.user = self.user2
-        response = postdelete_view(request, self.post.id)
+        response = PostDeleteView.as_view()(request, self.post.id)
 
         html = response.content.decode('utf8')
 
@@ -93,8 +97,11 @@ class PostDeleteViewTest(TestCase):
 
 
 class PostViewEditTest(TestCase):
+    edit_path = "/blog/post/%s/delete"
 
     def setUp(self):
+        self.factory = RequestFactory()
+
         self.user1 = get_user_model().objects.create_user('test1', 'test1@email.com', 'test1')
         self.user2 = get_user_model().objects.create_user('test2', 'test2@email.com', 'test2')
 
@@ -108,9 +115,9 @@ class PostViewEditTest(TestCase):
                                          tags=['tag1', 'tag2'], is_published=False)
 
     def test_unauth_in_post_edit_page(self):
-        request = HttpRequest()
+        request = self.factory.get(self.edit_path % self.post1.id)
         request.user = self.user2
-        response = postedit_view(request, self.post1.id)
+        response = PostEditView.as_view()(request, self.post1.id)
 
         html = response.content.decode('utf8')
 
@@ -118,9 +125,9 @@ class PostViewEditTest(TestCase):
         self.assertIn("ACCESS DENIED!", html)
 
     def test_auth_in_post_edit_page(self):
-        request = HttpRequest()
+        request = self.factory.get(self.edit_path % self.post1.id)
         request.user = self.user1
-        response = postedit_view(request, self.post1.id)
+        response = PostEditView.as_view()(request, self.post1.id)
 
         html = response.content.decode('utf8')
 
@@ -131,9 +138,10 @@ class PostViewEditTest(TestCase):
         self.assertNotIn('Save Draft', html)
 
     def test_draft_in_post_edit_page(self):
-        request = HttpRequest()
+        request = self.factory.get(self.edit_path % self.post2.id)
+
         request.user = self.user1
-        response = postedit_view(request, self.post2.id)
+        response = PostEditView.as_view()(request, self.post2.id)
 
         html = response.content.decode('utf8')
 
@@ -145,8 +153,11 @@ class PostViewEditTest(TestCase):
 
 
 class PostViewTest(TestCase):
+    post_view_path = "/blog/post/%s"
 
     def setUp(self):
+        self.factory = RequestFactory()
+
         self.user1 = get_user_model().objects.create_user('test1', 'test1@email.com', 'test1')
         self.user2 = get_user_model().objects.create_user('test2', 'test2@email.com', 'test2')
 
@@ -157,9 +168,9 @@ class PostViewTest(TestCase):
                                         tags=['tag1', 'tag2'], )
 
     def test_post_in_post_view_page(self):
-        request = HttpRequest()
+        request = self.factory.get(self.post_view_path % self.post.id)
 
-        response = postview_view(request, self.post.id)
+        response = PostView.as_view()(request, self.post.id)
 
         html = response.content.decode('utf8')
 
@@ -173,9 +184,9 @@ class PostViewTest(TestCase):
         self.assertIn('Test Content', html)
 
     def test_unauth_in_post_view_page(self):
-        request = HttpRequest()
+        request = self.factory.get(self.post_view_path % self.post.id)
         request.user = self.user2
-        response = postview_view(request, self.post.id)
+        response = PostView.as_view()(request, self.post.id)
 
         html = response.content.decode('utf8')
 
@@ -186,9 +197,9 @@ class PostViewTest(TestCase):
         self.assertNotIn('Delete</a>', html)
 
     def test_auth_in_post_view_page(self):
-        request = HttpRequest()
+        request = self.factory.get(self.post_view_path % self.post.id)
         request.user = self.user1
-        response = postview_view(request, self.post.id)
+        response = PostView.as_view()(request, self.post.id)
 
         html = response.content.decode('utf8')
 
@@ -199,9 +210,9 @@ class PostViewTest(TestCase):
         self.assertIn('Delete</a>', html)
 
     def test_no_post_in_post_view_page(self):
-        request = HttpRequest()
+        request = self.factory.get(self.post_view_path % self.post.id)
         request.user = self.user1
-        response = postview_view(request, 99)
+        response = PostView.as_view()(request, 99)
 
         html = response.content.decode('utf8')
 

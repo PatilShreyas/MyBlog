@@ -1,6 +1,7 @@
 from django.test import TestCase
 
 from MyBlog.forms import SignInForm, SignUpForm, PostForm
+from MyBlog.models import Category
 
 
 class SignInFormTest(TestCase):
@@ -34,10 +35,12 @@ class SignUpFormTest(TestCase):
 
 class PostFormTest(TestCase):
     def test_post_form_valid(self):
-        form = PostForm(data={'title': 'Hi there',
-                              'content': 'This is content',
-                              'tags': 'tag1, tag2',
-                              'category': 1})
+        form = PostForm(data={
+            'title': 'Title',
+            'content': 'Content',
+            'tags': ['tag1', 'tag2'],
+            'category': Category.objects.create(name='FormCategoryTest')
+        })
 
         self.assertTrue(form.is_valid())
 
