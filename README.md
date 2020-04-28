@@ -20,19 +20,14 @@ Remember the values you've entered above. It'll be helpful in upcoming steps.
     
 ### Setup Project:
 
-- Go to [`settings.py`](MyBlogApp/settings.py) and change the values of these fields:
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'DB_NAME',
-        'USER': 'DB_USER',
-        'PASSWORD': 'DB_PASSWORD',
-        'HOST': 'localhost',
-        'PORT': '',
-    }
-}
+- Create `.env` file in [`MyBlogApp/`](/MyBlogApp) directory and replace below fields with values.
+```text
+DEBUG=true
+SECRET_KEY=YOUR_SECRET
+DB_HOST=YOUR_DB_HOST
+DB_NAME=YOUR_DB_NAME
+DB_USER=YOUR_DB_USER
+DB_PASSWORD=YOUR_DB_PASSWORD
 ```
 
 - Install Requirements:
