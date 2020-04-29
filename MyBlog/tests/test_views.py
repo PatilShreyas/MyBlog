@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, RequestFactory
+from django.urls import reverse
 
 from MyBlog.models import Category, Post
 from MyBlog.views import IndexView, PostDeleteView, PostEditView, PostView
@@ -76,7 +77,7 @@ class PostDeleteViewTest(TestCase):
                                         tags=['tag1', 'tag2'], )
 
     def test_post_deleted_in_post_delete_page(self):
-        request = self.factory.get(self.delete_path % self.post.id)
+        request = self.factory.get(reverse('deletepost', args=[self.post.id]))
         request.user = self.user1
         response = PostDeleteView.as_view()(request, self.post.id)
 
@@ -86,7 +87,7 @@ class PostDeleteViewTest(TestCase):
         self.assertIn('Post has been deleted!', html)
 
     def test_unauth_in_post_view_page(self):
-        request = self.factory.get(self.delete_path % self.post.id)
+        request = self.factory.get(reverse('deletepost', args=[self.post.id]))
         request.user = self.user2
         response = PostDeleteView.as_view()(request, self.post.id)
 
@@ -97,7 +98,6 @@ class PostDeleteViewTest(TestCase):
 
 
 class PostViewEditTest(TestCase):
-    edit_path = "/blog/post/%s/delete"
 
     def setUp(self):
         self.factory = RequestFactory()
@@ -115,7 +115,7 @@ class PostViewEditTest(TestCase):
                                          tags=['tag1', 'tag2'], is_published=False)
 
     def test_unauth_in_post_edit_page(self):
-        request = self.factory.get(self.edit_path % self.post1.id)
+        request = self.factory.get(reverse('editpost', args=[self.post1.id]))
         request.user = self.user2
         response = PostEditView.as_view()(request, self.post1.id)
 
@@ -125,7 +125,7 @@ class PostViewEditTest(TestCase):
         self.assertIn("ACCESS DENIED!", html)
 
     def test_auth_in_post_edit_page(self):
-        request = self.factory.get(self.edit_path % self.post1.id)
+        request = self.factory.get(reverse('editpost', args=[self.post1.id]))
         request.user = self.user1
         response = PostEditView.as_view()(request, self.post1.id)
 
@@ -138,7 +138,7 @@ class PostViewEditTest(TestCase):
         self.assertNotIn('Save Draft', html)
 
     def test_draft_in_post_edit_page(self):
-        request = self.factory.get(self.edit_path % self.post2.id)
+        request = self.factory.get(reverse('editpost', args=[self.post2.id]))
 
         request.user = self.user1
         response = PostEditView.as_view()(request, self.post2.id)
@@ -153,7 +153,6 @@ class PostViewEditTest(TestCase):
 
 
 class PostViewTest(TestCase):
-    post_view_path = "/blog/post/%s"
 
     def setUp(self):
         self.factory = RequestFactory()
@@ -168,7 +167,7 @@ class PostViewTest(TestCase):
                                         tags=['tag1', 'tag2'], )
 
     def test_post_in_post_view_page(self):
-        request = self.factory.get(self.post_view_path % self.post.id)
+        request = self.factory.get(reverse('post', args=[self.post.id]))
 
         response = PostView.as_view()(request, self.post.id)
 
@@ -184,7 +183,7 @@ class PostViewTest(TestCase):
         self.assertIn('Test Content', html)
 
     def test_unauth_in_post_view_page(self):
-        request = self.factory.get(self.post_view_path % self.post.id)
+        request = self.factory.get(reverse('post', args=[self.post.id]))
         request.user = self.user2
         response = PostView.as_view()(request, self.post.id)
 
@@ -197,7 +196,7 @@ class PostViewTest(TestCase):
         self.assertNotIn('Delete</a>', html)
 
     def test_auth_in_post_view_page(self):
-        request = self.factory.get(self.post_view_path % self.post.id)
+        request = self.factory.get(reverse('post', args=[self.post.id]))
         request.user = self.user1
         response = PostView.as_view()(request, self.post.id)
 
@@ -210,7 +209,7 @@ class PostViewTest(TestCase):
         self.assertIn('Delete</a>', html)
 
     def test_no_post_in_post_view_page(self):
-        request = self.factory.get(self.post_view_path % self.post.id)
+        request = self.factory.get(reverse('post', args=[self.post.id]))
         request.user = self.user1
         response = PostView.as_view()(request, 99)
 
