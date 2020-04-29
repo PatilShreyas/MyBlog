@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 
@@ -42,26 +41,16 @@ class IndexView(View):
 
 
 class SignUpView(View):
-    form_class = SignUpForm
 
     def get(self, request, *args, **kwargs):
-        form = self.form_class()
+        form = SignUpForm()
         return render(request, 'registration/signup.html', {'form': form})
 
     def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
+        form = SignUpForm(request.POST)
 
         if form.is_valid():
-            first_name = form.cleaned_data.get('first_name')
-            last_name = form.cleaned_data.get('last_name')
-            email = form.cleaned_data.get('email')
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password1')
-
-            user = User.objects.create_user(first_name=first_name, last_name=last_name, username=username, email=email,
-                                            password=password)
-
-            user.save()
+            form.save()
             return redirect('signin')
         else:
             form = SignUpForm()
