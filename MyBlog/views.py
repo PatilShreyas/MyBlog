@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 
 from .forms import SignUpForm, PostForm, SearchForm
@@ -94,23 +93,14 @@ class AddPostView(View):
 
 class PostView(View):
     def get(self, request, post_id):
-        try:
-            post = Post.objects.get(id=post_id)
-        except ObjectDoesNotExist:
-            post = None
+        post = get_object_or_404(Post, id=post_id)
         return render(request, 'view_post.html', {'post': post})
 
 
 class PostEditView(View):
     def get(self, request, post_id):
-        try:
-            post = Post.objects.get(id=post_id)
-
-            form = PostForm(instance=post)
-
-        except ObjectDoesNotExist:
-            post = None
-            form = None
+        post = get_object_or_404(Post, id=post_id)
+        form = PostForm(instance=post)
 
         return render(request, 'edit_post.html', {'form': form, 'post': post})
 
@@ -131,13 +121,9 @@ class PostEditView(View):
 
 class PostDeleteView(View):
     def get(self, request, post_id):
-        try:
-            post = Post.objects.get(id=post_id)
+        post = get_object_or_404(Post, id=post_id)
 
-            if request.user == post.user:
-                post.delete()
-
-        except ObjectDoesNotExist:
-            post = None
+        if request.user == post.user:
+            post.delete()
 
         return render(request, 'delete_post.html', {'post': post})
